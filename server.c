@@ -1,55 +1,54 @@
-#include <stdlib.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: haeltahi <haeltahi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/05 15:48:12 by haeltahi          #+#    #+#             */
+/*   Updated: 2024/01/05 15:50:37 by haeltahi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <signal.h>
 #include <stdio.h>
-#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <signal.h>
 
-
-
-void	ft_putstr_fd(char *s, int fd)
+void	signal_handler(int signum)
 {
-	if (!(s))
-		return ;
-	while (*s)
+	static int	recieved_bits;
+	static char	charachter;
+	int			mask;
+
+	recieved_bits = 0;
+	charachter = 0;
+	if (signum == SIGUSR1)
 	{
-		write(fd, s, 1);
-		s++;
+		mask = 1 << recieved_bits;
+		charachter = (charachter | mask);
+		recieved_bits++;
+	}
+	else if (signum == SIGUSR2)
+	{
+		recieved_bits++;
+	}
+	if (recieved_bits == 8)
+	{
+		recieved_bits = 0;
+		write(1, &charachter, 1);
+		charachter = 0;
 	}
 }
-void sig_handler(int signum,siginfo_t *info,void* context)
+
+int	main(void)
 {
-	(void)context;
-
-	static int bit_count;
-
-	bit_count = 0;
-
-	recieved_data = 1;
-
-	if(signum == SIGUSR2)
-		bit_count++;
-	else if(signum == SIGUSR1)
+	printf("PID: %d\n", getpid());
+	while (1)
 	{
-		int byte_count = bit_count /8;
-		printf("Recieved%d bytes \n",byte_count);
-		bit_count = 0;
-		recieved_data = 0;
+		signal(SIGUSR1, signal_handler);
+		signal(SIGUSR2, signal_handler);
+		pause();
 	}
-}
-int main(int ac,char **av)
-{
-
-	struct sigaction sa;
-	sa.sa_sigaction = &sig_handler;
-	sa.sa_flags = SA_SIGINFO;
-	(void)av;
-	while(ac != 1)
-		ft_putstr_fd("Enter a correct PID",2);
-	printf("Service PID : %d\n",getpid());
-while (1)
-{
-	pause();
-}
-
-
 }
