@@ -5,24 +5,26 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: haeltahi <haeltahi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/05 15:47:52 by haeltahi          #+#    #+#             */
-/*   Updated: 2024/01/05 16:25:31 by haeltahi         ###   ########.fr       */
+/*   Created: 2024/01/13 19:10:30 by haeltahi          #+#    #+#             */
+/*   Updated: 2024/01/13 22:29:16 by haeltahi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-int	ft_strlen(char *str)
+void	ft_putstr_fd(char *s, int fd)
 {
-	int	i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
+	if (!(s))
+		return ;
+	while (*s)
+	{
+		write(fd, s, 1);
+		s++;
+	}
 }
 
 int	ft_atoi(const char *str)
@@ -54,6 +56,22 @@ int	ft_atoi(const char *str)
 	return (sign * result);
 }
 
+void	handler(int signal1, siginfo_t *info, void *context)
+{
+	int	pid;
+
+	(void)(context);
+	pid = info->si_pid;
+	while (1)
+	{
+		if (signal1 == SIGUSR1)
+		{
+			printf("we recieved");
+			break ;
+		}
+	}
+}
+
 void	convertchartobit(int pid, char character)
 {
 	int	i;
@@ -72,26 +90,35 @@ void	convertchartobit(int pid, char character)
 			kill(pid, SIGUSR1);
 		}
 		i++;
-		usleep(200);
+		usleep(100);
 	}
 }
 
-int	main(int ac, char **argv)
+int	main(int ac, char **av)
 {
-	int		server_pid;
-	char	*message;
-	int		i;
+	int					i;
+	int					pid;
+	char				*message;
+	struct sigaction	sw;
+	int					j;
 
-	if (ac != 3)
+	(void)ac;
+	if (ac == 3)
 	{
-		printf("Usage: %s <server_pid> <message>\n", argv[0]);
-		return (1);
+		sigemptyset(&sw.sa_mask);
+		sw.sa_flags = SA_SIGINFO;
+		sw.sa_sigaction = &handler;
+		sigaction(SIGUSR1, &sw, NULL);
+		i = 0;
+		pid = ft_atoi(av[1]);
+		message = av[2];
+		j = 0;
+		while (message[j])
+			j++;
+		while (i < j)
+			convertchartobit(pid, message[i++]);
+		convertchartobit(pid, '\0');
 	}
-	server_pid = ft_atoi(argv[1]);
-	message = argv[2];
-	while (i < ft_strlen(message))
-	{
-		convertchartobit(server_pid, message[i]);
-		i++;
-	}
+	else
+		ft_putstr_fd("Usage: ./client <server_pid> <message>\n", 2);
 }

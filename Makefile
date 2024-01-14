@@ -6,7 +6,7 @@
 #    By: haeltahi <haeltahi@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/05 15:48:01 by haeltahi          #+#    #+#              #
-#    Updated: 2024/01/05 15:48:02 by haeltahi         ###   ########.fr        #
+#    Updated: 2024/01/13 21:40:55 by haeltahi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,7 @@ NAME = minitalk
 SERVER = server
 
 CLIENT = client
+
 
 CC = cc
 
@@ -25,6 +26,7 @@ RM = rm -f
 SRCS_SERVER = server.c 
 
 SRCS_CLIENT = client.c 
+
 
 OBJS_SERVER = $(SRCS_SERVER:.c=.o)
 
@@ -37,12 +39,10 @@ $(SERVER): $(OBJS_SERVER)
 
 $(CLIENT): $(OBJS_CLIENT)
 	$(CC) $(CFLAGS) -o $(CLIENT) $(OBJS_CLIENT)
-
 $(NAME): all
 
 clean:
-	$(RM) $(OBJS_SERVER) $(OBJS_CLIENT)
-
+	$(RM)	$(OBJS_SERVER)	$(OBJS_CLIENT)	$(SERVER)	$(CLIENT)	
 fclean: clean
 	$(RM) $(SERVER) $(CLIENT)
 
